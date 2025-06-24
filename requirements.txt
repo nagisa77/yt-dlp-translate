@@ -4,3 +4,4 @@ python-dotenv
 PyYAML
 yt-dlp
 openai
+tqdm

@@ -4,6 +4,8 @@ import re
 from pathlib import Path
 from typing import Iterable, Set
 
+from tqdm import tqdm
+
 import openai
 
 logger = logging.getLogger(__name__)
@@ -46,9 +48,11 @@ class SubtitleTranslator:
             processed.add(base_path)
 
         total = len(tasks)
-        for idx, (srt, target) in enumerate(tasks, 1):
-            logger.info('Translating file %d/%d: %s -> %s', idx, total, srt, target)
-            self.translate_file(srt, target)
+        with tqdm(total=total, desc='Translating', unit='file') as pbar:
+            for idx, (srt, target) in enumerate(tasks, 1):
+                logger.info('Translating file %d/%d: %s -> %s', idx, total, srt, target)
+                self.translate_file(srt, target)
+                pbar.update(1)
 
     def translate_file(self, src: Path, dest: Path):
         content = src.read_text(encoding='utf-8')
