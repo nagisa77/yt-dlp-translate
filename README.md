@@ -3,7 +3,9 @@
 This project automates two steps of my personal workflow:
 
 1. Create or locate a playlist on YouTube through the YouTube Data API and list all its video URLs, **or** read a list of URLs directly from `config.yaml`.
-2. Download each video together with its English subtitles using [yt-dlp](https://github.com/yt-dlp/yt-dlp).
+2. Download each video together with subtitles using [yt-dlp](https://github.com/yt-dlp/yt-dlp). The script
+   will try to fetch subtitles in your target language first and fall back to English
+   subtitles which are later translated with OpenAI.
 
 The downloaded files are stored locally so they can later be translated to Chinese and played back on Apple TV.
 
@@ -32,11 +34,14 @@ cp config.yaml.example config.yaml
    `download` section to let yt-dlp authenticate using your browser cookies. The extracted
    cookies will be saved to `youtube_cookies.txt` in the project directory for reuse.
 
-5. Run the helper:
+5. Run the helper to download videos and subtitles:
 
 ```bash
 python main.py
 ```
+
+After the download finishes, the script will automatically translate any English
+subtitles to the configured target language using your OpenAI API key.
 
 OAuth authentication is required on first run when using `playlist_name`. If `video_urls` are provided, the script skips Google login. Afterwards the script will print the playlist URL (if any), list the videos found and download each one with subtitles.
 

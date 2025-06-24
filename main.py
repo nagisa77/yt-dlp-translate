@@ -2,7 +2,7 @@ import logging
 import pathlib
 import yaml
 
-from yt_helper import YouTubePlaylist, Downloader
+from yt_helper import YouTubePlaylist, Downloader, SubtitleTranslator
 
 logging.basicConfig(
     level=logging.INFO,
@@ -23,3 +23,6 @@ if not urls:
 
 downloader = Downloader(config)
 downloader.download(urls)
+
+translator = SubtitleTranslator(config)
+translator.translate_directory(downloader.output_path)
