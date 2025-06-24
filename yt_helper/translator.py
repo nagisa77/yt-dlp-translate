@@ -82,27 +82,28 @@ class SubtitleTranslator:
                     return
 
                 texts = [b[2] for b in batch]
-                delim = "\n###\n"
                 messages = [
                     {
                         "role": "system",
                         "content": (
-                            f"Translate each segment separated by '{delim.strip()}' to {self.target_lang}. "
-                            "Return the translated segments joined by the same delimiter."
+                            f"Translate each segment separated by new line to {self.target_lang}. "
+                            "Very important: Line count should be the same as the input."
+                            "Do not include any other text in your response."
                         ),
                     },
-                    {"role": "user", "content": delim.join(texts)},
+                    {"role": "user", "content": "\n".join(texts)},
                 ]
 
-                logger.info("Translating batch of %d entries", len(batch))
+                logger.info("Translating batch %s", "\n".join(texts))
 
                 try:
                     resp = self.client.chat.completions.create(
                         model=self.model, messages=messages
                     )
-                    translations = resp.choices[0].message.content.strip().split(delim)
+                    translations = resp.choices[0].message.content.strip().split("\n")
                     if len(translations) != len(texts):
-                        logger.warning("Unexpected translation count; using original text")
+                        logger.info("texts: %s, len: %d", texts, len(texts))
+                        logger.info("translations: %s, len: %d", translations, len(translations))
                         translations = texts
                 except Exception as e:
                     logger.error("Failed to translate part of %s: %s", src, e)
