@@ -1,5 +1,6 @@
 import os
 import pathlib
+import logging
 import yaml
 from dotenv import load_dotenv
 from googleapiclient.discovery import build
@@ -7,6 +8,12 @@ from googleapiclient.errors import HttpError
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s",
+)
+logger = logging.getLogger(__name__)
 
 # Read config
 CONFIG_FILE = pathlib.Path('config.yaml')
@@ -68,14 +75,14 @@ if not playlist_id:
     try:
         response = youtube.playlists().insert(part='snippet,status', body=body).execute()
         playlist_id = response['id']
-        print(f'Created playlist {PLAYLIST_NAME}')
+        logger.info('Created playlist %s', PLAYLIST_NAME)
     except HttpError as e:
         raise SystemExit(f'Error creating playlist: {e}')
 else:
-    print(f'Found playlist {PLAYLIST_NAME}')
+    logger.info('Found playlist %s', PLAYLIST_NAME)
 
 playlist_url = f'https://www.youtube.com/playlist?list={playlist_id}'
-print('Playlist URL:', playlist_url)
+logger.info('Playlist URL: %s', playlist_url)
 
 # List all video URLs in the playlist
 try:
@@ -96,7 +103,7 @@ try:
 except HttpError as e:
     raise SystemExit(f'Error fetching playlist items: {e}')
 
-print('Video URLs:')
+logger.info('Video URLs:')
 for item in playlist_items:
     video_id = item['contentDetails']['videoId']
-    print(f'https://www.youtube.com/watch?v={video_id}')
+    logger.info('https://www.youtube.com/watch?v=%s', video_id)

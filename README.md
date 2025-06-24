@@ -27,6 +27,9 @@ cp .env.example .env
 python main.py
 ```
 
+The script logs each action with a timestamp using Python's `logging`
+module. This makes it easy to see when playlist operations occur.
+
 The script will open a browser for OAuth the first time it runs. After
 authentication, it will print the URL of the playlist and list the URL
 for each video currently in the playlist.
