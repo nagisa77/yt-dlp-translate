@@ -77,12 +77,14 @@ class SubtitleTranslator:
         with tqdm(total=total, desc=src.name, unit="entry") as pbar:
             batch: list[tuple[str, str, str]] = []
 
-            def process_batch() -> None:
-                if not batch:
-                    return
+            def translate_segment(segment: list[tuple[str, str, str]]) -> list[str]:
+                """Translate a sequence of subtitle entries, retrying with
+                exponentially smaller segments on line count mismatch."""
 
-                # Add explicit numbering to each subtitle text to detect mismatches
-                numbered = [f"[{i}] {text}" for i, (_, _, text) in enumerate(batch, 1)]
+                if not segment:
+                    return []
+
+                numbered = [f"[{i}] {text}" for i, (_, _, text) in enumerate(segment, 1)]
                 system_msg = (
                     f"Translate every line to {self.target_lang}. "
                     "Keep the same numbering format like [1], [2], … and do NOT change order."
@@ -94,27 +96,40 @@ class SubtitleTranslator:
 
                 logger.info("Translating batch %s", "\n".join(numbered))
 
+                translations_map: dict[int, str] = {}
                 try:
                     resp = self.client.chat.completions.create(
                         model=self.model, messages=messages
                     )
                     raw = resp.choices[0].message.content.strip().splitlines()
 
-                    # Extract lines like "[1] translated text" back into a map
                     pattern = re.compile(r"^\[(\d+)]\s*(.*)$")
-                    translations_map = {}
                     for line in raw:
                         m = pattern.match(line)
                         if m:
                             translations_map[int(m.group(1))] = m.group(2)
                 except Exception as e:
                     logger.error("Failed to translate part of %s: %s", src, e)
-                    translations_map = {}
 
-                # Fallback to original text if translation is missing
-                for local_idx, (idx, timestamp, text) in enumerate(batch, 1):
+                if len(translations_map) != len(segment) and len(segment) > 1:
+                    logger.warning(
+                        "Mismatched line count; retrying with smaller batches: %d -> %d",
+                        len(segment), len(segment) // 2 or 1,
+                    )
+                    mid = len(segment) // 2
+                    return translate_segment(segment[:mid]) + translate_segment(segment[mid:])
+
+                results = []
+                for local_idx, (idx, timestamp, text) in enumerate(segment, 1):
                     trans = translations_map.get(local_idx, text)
-                    translated_entries.append("\n".join([idx, timestamp, trans.strip()]))
+                    results.append("\n".join([idx, timestamp, trans.strip()]))
+                return results
+
+            def process_batch() -> None:
+                if not batch:
+                    return
+
+                translated_entries.extend(translate_segment(batch))
                 pbar.update(len(batch))
                 batch.clear()
 
