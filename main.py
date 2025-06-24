@@ -17,9 +17,15 @@ if CONFIG_FILE.exists():
 else:
     config = {}
 
-playlist = YouTubePlaylist(config)
-urls = list(playlist.video_urls())
-logger.info('Found %d videos in playlist', len(urls))
+
+urls_from_config = config.get('video_urls')
+if urls_from_config:
+    urls = list(urls_from_config)
+    logger.info('Using %d URLs from config', len(urls))
+else:
+    playlist = YouTubePlaylist(config)
+    urls = list(playlist.video_urls())
+    logger.info('Found %d videos in playlist', len(urls))
 
 downloader = Downloader(config)
 downloader.download(urls)
