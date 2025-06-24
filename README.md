@@ -31,11 +31,11 @@ The script will open a browser for OAuth the first time it runs. After
 authentication, it will print the URL of the playlist and list the URL
 for each video currently in the playlist.
 
-## 获取 client_secrets.json
+## How to getting client_secrets.json?
 
-1. 登录 [Google Cloud Console](https://console.cloud.google.com) 并创建项目。
-2. 在 “APIs & Services → OAuth consent screen” 配置同意屏幕：选择内部/外部类型，填写应用名和邮箱，外部流程需添加测试用户。
-3. 打开 “APIs & Services → Credentials”，选择 “Create credentials → OAuth client ID”，按需选择应用类型（Desktop app、Web application 等），并填写重定向 URI。
-4. 创建完成后在弹窗点击 “Download JSON” 保存文件，将其命名为 `client_secrets.json`，或在 `.env` 中设置 `GOOGLE_CLIENT_SECRETS_FILE` 为实际路径。
-5. 2025 年 4 月起 client secret 仅在创建时可下载，丢失后需重新生成。
-6. 在 “APIs & Services → Library” 中启用要调用的 Google API。
+1. Sign in to [Google Cloud Console](https://console.cloud.google.com) and create a project.
+2. Configure the consent screen in "APIs & Services → OAuth consent screen": choose Internal/External type, fill in app name and email, add test users for external flow.
+3. Go to "APIs & Services → Credentials", select "Create credentials → OAuth client ID", choose application type (Desktop app, Web application etc.) and fill in redirect URIs.
+4. After creation, click "Download JSON" in the popup to save the file, name it `client_secrets.json`, or set `GOOGLE_CLIENT_SECRETS_FILE` in `.env` to the actual path.
+5. Starting April 2025, client secrets can only be downloaded at creation time, must be regenerated if lost.
+6. Enable required Google APIs in "APIs & Services → Library".
