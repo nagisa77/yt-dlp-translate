@@ -22,7 +22,9 @@ cp .env.example .env
 # then edit .env
 ```
 
-3. Adjust `config.yaml` to define the playlist name, output directory and download options.
+3. Adjust `config.yaml` to define the playlist name, output directory and download options. If
+   YouTube requests a sign-in to confirm you're not a bot, export your browser cookies and set
+   `cookie_file` or `cookies_from_browser` under the `download` section to let yt-dlp authenticate.
 
 4. Run the helper:
 
