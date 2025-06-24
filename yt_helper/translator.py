@@ -50,7 +50,6 @@ class SubtitleTranslator:
         total = len(tasks)
         with tqdm(total=total, desc='Translating', unit='file') as pbar:
             for idx, (srt, target) in enumerate(tasks, 1):
-                logger.info('Translating file %d/%d: %s -> %s', idx, total, srt, target)
                 self.translate_file(srt, target)
                 pbar.update(1)
 
