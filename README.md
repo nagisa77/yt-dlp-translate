@@ -48,6 +48,7 @@ cp config.yaml.example config.yaml
    `download` section to let yt-dlp authenticate using your browser cookies. The extracted
    cookies will be saved to `youtube_cookies.txt` in the project directory for reuse.
    Set `translate.force` to `true` if you want subtitles translated even when files in the target language already exist.
+   Use `translate.entries_per_request` to batch multiple subtitle entries into a single OpenAI request.
 
 5. Run the helper to download videos and subtitles:
 

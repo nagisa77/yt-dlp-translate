@@ -17,6 +17,7 @@ class SubtitleTranslator:
         self.model = trans_conf.get('model', 'gpt-4o-mini')
         # When True, translate even if subtitles in the target language already exist
         self.force = trans_conf.get('force', False)
+        self.entries_per_request = max(1, trans_conf.get('entries_per_request', 1))
         api_key = os.getenv('OPENAI_API_KEY')
         if not api_key:
             logger.warning('OPENAI_API_KEY not set; translation disabled')
@@ -74,9 +75,48 @@ class SubtitleTranslator:
         total = len(entries)
 
         with tqdm(total=total, desc=src.name, unit="entry") as pbar:
+            batch: list[tuple[str, str, str]] = []
+
+            def process_batch() -> None:
+                if not batch:
+                    return
+
+                texts = [b[2] for b in batch]
+                delim = "\n###\n"
+                messages = [
+                    {
+                        "role": "system",
+                        "content": (
+                            f"Translate each segment separated by '{delim.strip()}' to {self.target_lang}. "
+                            "Return the translated segments joined by the same delimiter."
+                        ),
+                    },
+                    {"role": "user", "content": delim.join(texts)},
+                ]
+
+                logger.info("Translating batch of %d entries", len(batch))
+
+                try:
+                    resp = self.client.chat.completions.create(
+                        model=self.model, messages=messages
+                    )
+                    translations = resp.choices[0].message.content.strip().split(delim)
+                    if len(translations) != len(texts):
+                        logger.warning("Unexpected translation count; using original text")
+                        translations = texts
+                except Exception as e:
+                    logger.error("Failed to translate part of %s: %s", src, e)
+                    translations = texts
+
+                for (idx, timestamp, _), trans in zip(batch, translations):
+                    translated_entries.append("\n".join([idx, timestamp, trans.strip()]))
+                pbar.update(len(batch))
+                batch.clear()
+
             for entry in entries:
                 lines = entry.splitlines()
                 if len(lines) < 3:
+                    process_batch()
                     translated_entries.append(entry)
                     pbar.update(1)
                     continue
@@ -84,31 +124,10 @@ class SubtitleTranslator:
                 idx, timestamp, *text_lines = lines
                 text = "\n".join(text_lines)
 
-                messages = [
-                    {
-                        "role": "system",
-                        "content": (
-                            f"Translate the following subtitle text to {self.target_lang} "
-                            "and keep the SRT format."
-                        ),
-                    },
-                    {"role": "user", "content": text},
-                ]
+                batch.append((idx, timestamp, text))
+                if len(batch) >= self.entries_per_request:
+                    process_batch()
 
-                logger.info(f"Translating {text}")
-
-                try:
-                    resp = self.client.chat.completions.create(
-                        model=self.model, messages=messages
-                    )
-                    translated_text = resp.choices[0].message.content.strip()
-                except Exception as e:
-                    logger.error("Failed to translate part of %s: %s", src, e)
-                    translated_text = text
-
-                translated_entries.append(
-                    "\n".join([idx, timestamp, translated_text])
-                )
-                pbar.update(1)
+            process_batch()
 
         dest.write_text("\n\n".join(translated_entries) + "\n", encoding="utf-8")
