@@ -7,6 +7,11 @@ playlist_name: Example Playlist
 download:
   output_path: downloads
   format: bestvideo+bestaudio/best
-  subtitle_langs: ["en.*"]
+  # Subtitles to request from YouTube. The target language is tried first.
+  subtitle_langs: ["zh.*", "en.*"]
   # Optional: read cookies directly from a browser profile
   # cookies_from_browser: chrome  # saves cookies to youtube_cookies.txt
+
+translate:
+  target_lang: zh
+  model: gpt-4o-mini

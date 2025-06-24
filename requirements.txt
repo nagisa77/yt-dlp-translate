@@ -3,3 +3,4 @@ google-auth-oauthlib
 python-dotenv
 PyYAML
 yt-dlp
+openai

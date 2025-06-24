@@ -18,10 +18,14 @@ DEFAULT_OPTS = {
 class Downloader:
     def __init__(self, config: dict) -> None:
         dl_config = config.get('download', {})
+        trans_conf = config.get('translate', {})
+        target_lang = trans_conf.get('target_lang', 'zh')
+
         self.output_path = Path(dl_config.get('output_path', 'downloads'))
         self.opts = DEFAULT_OPTS.copy()
         self.opts['format'] = dl_config.get('format', self.opts['format'])
-        self.opts['subtitleslangs'] = dl_config.get('subtitle_langs', self.opts['subtitleslangs'])
+        default_langs = [f'{target_lang}.*', 'en.*']
+        self.opts['subtitleslangs'] = dl_config.get('subtitle_langs', default_langs)
         self.opts['outtmpl'] = str(self.output_path / '%(playlist)s/%(title)s.%(ext)s')
         browser = dl_config.get('cookies_from_browser')
         if browser:
