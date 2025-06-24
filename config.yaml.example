@@ -1,19 +1,35 @@
+# Example configuration for yt-dlp-translate
+# Uncomment and edit the options you wish to use
+
 playlist_name: Example Playlist
-# Alternatively, remove `playlist_name` and provide video URLs directly
+# playlist_name 是想使用的播放列表名称，可以自动创建
+# 或者去掉 playlist_name 直接指定视频URL：
 # video_urls:
 #   - https://www.youtube.com/watch?v=dQw4w9WgXcQ
 #   - https://www.youtube.com/watch?v=oHg5SJYRHA0
+#   - https://www.youtube.com/watch?v=J---aiyznGQ
 
 download:
+  # 文件会保存到该目录
   output_path: downloads
+  # 视频格式，可根据 yt-dlp 规则编写
+  # 如限制为1080p:
+  # format: "bestvideo[height<=1080]+bestaudio/best"
   format: bestvideo+bestaudio/best
-  # Subtitles to request from YouTube. The target language is tried first.
+  # 从 YouTube 请求的字幕语言列表
   subtitle_langs: ["zh.*", "en.*"]
-  # Optional: read cookies directly from a browser profile
-  # cookies_from_browser: chrome  # saves cookies to youtube_cookies.txt
+  # 如需登录，可从浏览器读取 cookies
+  # cookies_from_browser: chrome
+  # cookies_from_browser: edge
+  # cookies_from_browser: "chrome --profile MyProfile"
 
 translate:
+  # 目标语言代码，例如 zh 或 ja
   target_lang: zh
+  # OpenAI 模型名称
   model: gpt-4o-mini
-  # Set to true to always translate even if the target subtitles exist
+  # model: gpt-4o
+  # model: gpt-3.5-turbo
+  # 强制翻译，即使目标语言字幕已存在
   force: false
+  # force: true
