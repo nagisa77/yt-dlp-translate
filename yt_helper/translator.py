@@ -95,6 +95,8 @@ class SubtitleTranslator:
                     {"role": "user", "content": text},
                 ]
 
+                logger.info(f"Translating {text}")
+
                 try:
                     resp = self.client.chat.completions.create(
                         model=self.model, messages=messages
