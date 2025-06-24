@@ -81,35 +81,39 @@ class SubtitleTranslator:
                 if not batch:
                     return
 
-                texts = [b[2] for b in batch]
+                # Add explicit numbering to each subtitle text to detect mismatches
+                numbered = [f"[{i}] {text}" for i, (_, _, text) in enumerate(batch, 1)]
+                system_msg = (
+                    f"Translate every line to {self.target_lang}. "
+                    "Keep the same numbering format like [1], [2], … and do NOT change order."
+                )
                 messages = [
-                    {
-                        "role": "system",
-                        "content": (
-                            f"Translate each segment separated by new line to {self.target_lang}. "
-                            "Very important: Line count should be the same as the input."
-                            "Do not include any other text in your response."
-                        ),
-                    },
-                    {"role": "user", "content": "\n".join(texts)},
+                    {"role": "system", "content": system_msg},
+                    {"role": "user", "content": "\n".join(numbered)},
                 ]
 
-                logger.info("Translating batch %s", "\n".join(texts))
+                logger.info("Translating batch %s", "\n".join(numbered))
 
                 try:
                     resp = self.client.chat.completions.create(
                         model=self.model, messages=messages
                     )
-                    translations = resp.choices[0].message.content.strip().split("\n")
-                    if len(translations) != len(texts):
-                        logger.info("texts: %s, len: %d", texts, len(texts))
-                        logger.info("translations: %s, len: %d", translations, len(translations))
-                        translations = texts
+                    raw = resp.choices[0].message.content.strip().splitlines()
+
+                    # Extract lines like "[1] translated text" back into a map
+                    pattern = re.compile(r"^\[(\d+)]\s*(.*)$")
+                    translations_map = {}
+                    for line in raw:
+                        m = pattern.match(line)
+                        if m:
+                            translations_map[int(m.group(1))] = m.group(2)
                 except Exception as e:
                     logger.error("Failed to translate part of %s: %s", src, e)
-                    translations = texts
+                    translations_map = {}
 
-                for (idx, timestamp, _), trans in zip(batch, translations):
+                # Fallback to original text if translation is missing
+                for local_idx, (idx, timestamp, text) in enumerate(batch, 1):
+                    trans = translations_map.get(local_idx, text)
                     translated_entries.append("\n".join([idx, timestamp, trans.strip()]))
                 pbar.update(len(batch))
                 batch.clear()
