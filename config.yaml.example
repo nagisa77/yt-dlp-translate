@@ -2,34 +2,34 @@
 # Uncomment and edit the options you wish to use
 
 playlist_name: Example Playlist
-# playlist_name 是想使用的播放列表名称，可以自动创建
-# 或者去掉 playlist_name 直接指定视频URL：
+# playlist_name is the name of the playlist you want to use, can be auto-created
+# Or remove playlist_name and specify video URLs directly:
 # video_urls:
 #   - https://www.youtube.com/watch?v=dQw4w9WgXcQ
 #   - https://www.youtube.com/watch?v=oHg5SJYRHA0
 #   - https://www.youtube.com/watch?v=J---aiyznGQ
 
 download:
-  # 文件会保存到该目录
+  # Files will be saved to this directory
   output_path: downloads
-  # 视频格式，可根据 yt-dlp 规则编写
-  # 如限制为1080p:
+  # Video format, can be written according to yt-dlp rules
+  # For example, limit to 1080p:
   # format: "bestvideo[height<=1080]+bestaudio/best"
   format: bestvideo+bestaudio/best
-  # 从 YouTube 请求的字幕语言列表
+  # List of subtitle languages to request from YouTube
   subtitle_langs: ["zh.*", "en.*"]
-  # 如需登录，可从浏览器读取 cookies
+  # To login, cookies can be read from browser
   # cookies_from_browser: chrome
   # cookies_from_browser: edge
   # cookies_from_browser: "chrome --profile MyProfile"
 
 translate:
-  # 目标语言代码，例如 zh 或 ja
+  # Target language code, e.g. zh or ja
   target_lang: zh
-  # OpenAI 模型名称
+  # OpenAI model name
   model: gpt-4o-mini
   # model: gpt-4o
   # model: gpt-3.5-turbo
-  # 强制翻译，即使目标语言字幕已存在
+  # Force translation even if target language subtitles exist
   force: false
   # force: true

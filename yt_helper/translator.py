@@ -41,7 +41,7 @@ class SubtitleTranslator:
                 processed.add(base_path)
                 continue
 
-            target = srt.with_name(f'{base_name}.{self.target_lang}.srt')
+            target = srt.with_name(f'{base_name}.{self.target_lang}-ai.srt')
             self.translate_file(srt, target)
             processed.add(base_path)
 
