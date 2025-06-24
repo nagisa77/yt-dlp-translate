@@ -13,6 +13,8 @@ class SubtitleTranslator:
         trans_conf = config.get('translate', {})
         self.target_lang = trans_conf.get('target_lang', 'zh')
         self.model = trans_conf.get('model', 'gpt-4o-mini')
+        # When True, translate even if subtitles in the target language already exist
+        self.force = trans_conf.get('force', False)
         api_key = os.getenv('OPENAI_API_KEY')
         if not api_key:
             logger.warning('OPENAI_API_KEY not set; translation disabled')
@@ -34,7 +36,7 @@ class SubtitleTranslator:
 
             # Skip if any subtitle for the target language already exists
             existing = list(srt.parent.glob(f'{base_name}.{self.target_lang}*.srt'))
-            if existing:
+            if existing and not self.force:
                 logger.info('Skipping %s because target subtitle already exists', srt)
                 processed.add(base_path)
                 continue
