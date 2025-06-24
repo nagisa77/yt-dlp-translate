@@ -29,7 +29,8 @@ cp config.yaml.example config.yaml
 
 4. Adjust `config.yaml` to define the playlist name, output directory and download options. If
    YouTube requests a sign-in to confirm you're not a bot, set `cookies_from_browser` under the
-   `download` section to let yt-dlp authenticate using your browser cookies.
+   `download` section to let yt-dlp authenticate using your browser cookies. The extracted
+   cookies will be saved to `youtube_cookies.txt` in the project directory for reuse.
 
 5. Run the helper:
 

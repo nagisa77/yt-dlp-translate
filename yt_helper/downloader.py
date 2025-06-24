@@ -2,7 +2,7 @@ import logging
 from pathlib import Path
 from typing import Iterable
 
-from yt_dlp import YoutubeDL
+from yt_dlp import YoutubeDL, parse_options
 
 logger = logging.getLogger(__name__)
 
@@ -27,7 +27,14 @@ class Downloader:
         if browser:
             logger.info('Using cookies from browser %s', browser)
             self.opts['cookiefile'] = 'youtube_cookies.txt'
-            self.opts['cookiesfrombrowser'] = browser
+            if isinstance(browser, str):
+                # Reuse yt-dlp's parser to handle KEYRING/PROFILE/CONTAINER syntax
+                self.opts['cookiesfrombrowser'] = parse_options([
+                    f'--cookies-from-browser={browser}'
+                ])[1].cookiesfrombrowser
+            else:
+                # Allow passing tuples directly for advanced usage
+                self.opts['cookiesfrombrowser'] = tuple(browser)
         self.output_path.mkdir(parents=True, exist_ok=True)
 
     def download(self, urls: Iterable[str]):
