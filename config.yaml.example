@@ -33,3 +33,5 @@ translate:
   # Force translation even if target language subtitles exist
   force: false
   # force: true
+  # Number of subtitle entries to send in each OpenAI request
+  entries_per_request: 1
