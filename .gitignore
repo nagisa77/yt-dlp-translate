@@ -5,3 +5,4 @@ token.json
 .venv
 client_secrets.json
 config.yaml
+youtube_cookies.txt

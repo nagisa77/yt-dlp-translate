@@ -23,11 +23,10 @@ class Downloader:
         self.opts['format'] = dl_config.get('format', self.opts['format'])
         self.opts['subtitleslangs'] = dl_config.get('subtitle_langs', self.opts['subtitleslangs'])
         self.opts['outtmpl'] = str(self.output_path / '%(playlist)s/%(title)s.%(ext)s')
-        cookie_file = dl_config.get('cookie_file')
-        if cookie_file:
-            self.opts['cookiefile'] = cookie_file
         browser = dl_config.get('cookies_from_browser')
         if browser:
+            logger.info('Using cookies from browser %s', browser)
+            self.opts['cookiefile'] = 'youtube_cookies.txt'
             self.opts['cookiesfrombrowser'] = browser
         self.output_path.mkdir(parents=True, exist_ok=True)
 
