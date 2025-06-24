@@ -5,4 +5,4 @@ download:
   format: bestvideo+bestaudio/best
   subtitle_langs: ["en.*"]
   # Optional: read cookies directly from a browser profile
-  # cookies_from_browser: chrome
+  # cookies_from_browser: chrome  # saves cookies to youtube_cookies.txt
