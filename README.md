@@ -8,6 +8,7 @@ This project automates two steps of my personal workflow:
    subtitles which are later translated with OpenAI.
 
 The downloaded files are stored locally so they can later be translated to Chinese and played back on Apple TV.
+Existing video files are detected and skipped, so rerunning the script will only download missing videos.
 
 ## Setup
 

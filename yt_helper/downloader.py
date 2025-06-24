@@ -48,6 +48,11 @@ class Downloader:
         with YoutubeDL(self.opts) as ydl:
             for url in urls:
                 try:
+                    info = ydl.extract_info(url, download=False)
+                    filepath = Path(ydl.prepare_filename(info))
+                    if filepath.exists():
+                        logger.info('Skipping %s; %s already exists', url, filepath)
+                        continue
                     logger.info('Downloading %s', url)
                     ydl.download([url])
                 except Exception as e:
