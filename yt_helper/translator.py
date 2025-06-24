@@ -11,7 +11,7 @@ class SubtitleTranslator:
     def __init__(self, config: dict) -> None:
         trans_conf = config.get('translate', {})
         self.target_lang = trans_conf.get('target_lang', 'zh')
-        self.model = trans_conf.get('model', 'gpt-3.5-turbo')
+        self.model = trans_conf.get('model', 'gpt-4o-mini')
         api_key = os.getenv('OPENAI_API_KEY')
         if not api_key:
             logger.warning('OPENAI_API_KEY not set; translation disabled')
