@@ -15,3 +15,5 @@ download:
 translate:
   target_lang: zh
   model: gpt-4o-mini
+  # Set to true to always translate even if the target subtitles exist
+  force: false
