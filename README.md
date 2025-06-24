@@ -62,6 +62,8 @@ OAuth authentication is required on first run when using `playlist_name`. If `vi
 
 ## Obtaining client_secrets.json file
 
+**Note:** Obtaining the `client_secrets.json` file is only required when using `playlist_name` to access YouTube playlists. If you're only downloading individual videos using `video_urls`, you can skip this step.
+
 The following steps are only required when using `playlist_name` to access the YouTube Data API.
 
 1. Sign in to [Google Cloud Console](https://console.cloud.google.com) and create a project.
