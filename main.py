@@ -15,6 +15,10 @@ assert CONFIG_FILE.exists(), 'config.yaml not found'
 with open(CONFIG_FILE, 'r', encoding='utf-8') as f:
     config = yaml.safe_load(f)
 
+# delete youtube_cookies.txt
+if pathlib.Path('youtube_cookies.txt').exists():
+    pathlib.Path('youtube_cookies.txt').unlink()
+
 urls = config.get('video_urls')
 if not urls:
     playlist = YouTubePlaylist(config)
