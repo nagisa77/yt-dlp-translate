@@ -4,3 +4,7 @@ download:
   output_path: downloads
   format: bestvideo+bestaudio/best
   subtitle_langs: ["en.*"]
+  # Optional: path to cookies.txt exported from your browser
+  # cookie_file: /path/to/cookies.txt
+  # Optional: read cookies directly from a browser profile
+  # cookies_from_browser: chrome
