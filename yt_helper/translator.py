@@ -1,7 +1,8 @@
 import logging
 import os
+import re
 from pathlib import Path
-from typing import Iterable
+from typing import Iterable, Set
 
 import openai
 
@@ -22,11 +23,24 @@ class SubtitleTranslator:
     def translate_directory(self, base: Path):
         if not self.client:
             return
+        processed: Set[Path] = set()
         for srt in base.rglob('*.en*.srt'):
-            target = srt.with_name(srt.name.replace('.en', f'.{self.target_lang}'))
-            if target.exists():
+            # Remove the language suffix from the filename to determine the base
+            base_name = re.sub(r'\.en[^.]*', '', srt.stem)
+            base_path = srt.with_name(base_name)
+
+            if base_path in processed:
                 continue
+
+            # Skip if any subtitle for the target language already exists
+            existing = list(srt.parent.glob(f'{base_name}.{self.target_lang}*.srt'))
+            if existing:
+                processed.add(base_path)
+                continue
+
+            target = srt.with_name(f'{base_name}.{self.target_lang}.srt')
             self.translate_file(srt, target)
+            processed.add(base_path)
 
     def translate_file(self, src: Path, dest: Path):
         logger.info('Translating %s -> %s', src, dest)
