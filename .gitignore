@@ -4,3 +4,4 @@ token.json
 .env
 .venv
 client_secrets.json
+config.yaml
