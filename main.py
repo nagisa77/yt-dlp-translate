@@ -11,18 +11,12 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 CONFIG_FILE = pathlib.Path('config.yaml')
-if CONFIG_FILE.exists():
-    with open(CONFIG_FILE, 'r', encoding='utf-8') as f:
-        config = yaml.safe_load(f)
-else:
-    config = {}
+assert CONFIG_FILE.exists(), 'config.yaml not found'
+with open(CONFIG_FILE, 'r', encoding='utf-8') as f:
+    config = yaml.safe_load(f)
 
-
-urls_from_config = config.get('video_urls')
-if urls_from_config:
-    urls = list(urls_from_config)
-    logger.info('Using %d URLs from config', len(urls))
-else:
+urls = config.get('video_urls')
+if not urls:
     playlist = YouTubePlaylist(config)
     urls = list(playlist.video_urls())
     logger.info('Found %d videos in playlist', len(urls))
