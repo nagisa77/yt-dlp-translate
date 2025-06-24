@@ -1,4 +1,8 @@
 playlist_name: Example Playlist
+# Alternatively, remove `playlist_name` and provide video URLs directly
+# video_urls:
+#   - https://www.youtube.com/watch?v=dQw4w9WgXcQ
+#   - https://www.youtube.com/watch?v=oHg5SJYRHA0
 
 download:
   output_path: downloads

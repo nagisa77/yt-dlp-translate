@@ -2,7 +2,7 @@
 
 This project automates two steps of my personal workflow:
 
-1. Create or locate a playlist on YouTube through the YouTube Data API and list all its video URLs.
+1. Create or locate a playlist on YouTube through the YouTube Data API and list all its video URLs, **or** read a list of URLs directly from `config.yaml`.
 2. Download each video together with its English subtitles using [yt-dlp](https://github.com/yt-dlp/yt-dlp).
 
 The downloaded files are stored locally so they can later be translated to Chinese and played back on Apple TV.
@@ -15,7 +15,7 @@ The downloaded files are stored locally so they can later be translated to Chine
 uv pip install -r requirements.txt
 ```
 
-2. Copy `.env.example` to `.env` and edit it to point to your Google OAuth client secrets JSON.
+2. Copy `.env.example` to `.env` and edit it to point to your Google OAuth client secrets JSON. You can skip this step if `video_urls` is provided in the config.
 
 ```bash
 cp .env.example .env
@@ -27,7 +27,7 @@ cp .env.example .env
 cp config.yaml.example config.yaml
 ```
 
-4. Adjust `config.yaml` to define the playlist name, output directory and download options. If
+4. Adjust `config.yaml` to define either a `playlist_name` or a list of `video_urls`, along with the output directory and download options. If
    YouTube requests a sign-in to confirm you're not a bot, set `cookies_from_browser` under the
    `download` section to let yt-dlp authenticate using your browser cookies. The extracted
    cookies will be saved to `youtube_cookies.txt` in the project directory for reuse.
@@ -38,9 +38,11 @@ cp config.yaml.example config.yaml
 python main.py
 ```
 
-OAuth authentication is required on first run. Afterwards the script will print the playlist URL, list the videos found and download each one with subtitles.
+OAuth authentication is required on first run when using `playlist_name`. If `video_urls` are provided, the script skips Google login. Afterwards the script will print the playlist URL (if any), list the videos found and download each one with subtitles.
 
 ## Obtaining `client_secrets.json`
+
+The following steps are only required when using `playlist_name` to access the YouTube Data API.
 
 1. Sign in to [Google Cloud Console](https://console.cloud.google.com) and create a project.
 2. Configure the consent screen in **APIs & Services → OAuth consent screen** and add test users if necessary.
