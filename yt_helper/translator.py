@@ -54,17 +54,59 @@ class SubtitleTranslator:
                 pbar.update(1)
 
     def translate_file(self, src: Path, dest: Path):
-        content = src.read_text(encoding='utf-8')
-        messages = [
-            {
-                'role': 'system',
-                'content': f'Translate the following subtitles to {self.target_lang} and keep the SRT format.'
-            },
-            {'role': 'user', 'content': content},
-        ]
-        try:
-            resp = self.client.chat.completions.create(model=self.model, messages=messages)
-            translated = resp.choices[0].message.content
-            dest.write_text(translated, encoding='utf-8')
-        except Exception as e:
-            logger.error('Failed to translate %s: %s', src, e)
+        """Translate a single SRT file with per-entry progress reporting."""
+
+        content = src.read_text(encoding="utf-8")
+
+        # Split into subtitle blocks separated by blank lines
+        entries: list[str] = []
+        block: list[str] = []
+        for line in content.splitlines():
+            if line.strip() == "" and block:
+                entries.append("\n".join(block))
+                block = []
+            else:
+                block.append(line)
+        if block:
+            entries.append("\n".join(block))
+
+        translated_entries: list[str] = []
+        total = len(entries)
+
+        with tqdm(total=total, desc=src.name, unit="entry") as pbar:
+            for entry in entries:
+                lines = entry.splitlines()
+                if len(lines) < 3:
+                    translated_entries.append(entry)
+                    pbar.update(1)
+                    continue
+
+                idx, timestamp, *text_lines = lines
+                text = "\n".join(text_lines)
+
+                messages = [
+                    {
+                        "role": "system",
+                        "content": (
+                            f"Translate the following subtitle text to {self.target_lang} "
+                            "and keep the SRT format."
+                        ),
+                    },
+                    {"role": "user", "content": text},
+                ]
+
+                try:
+                    resp = self.client.chat.completions.create(
+                        model=self.model, messages=messages
+                    )
+                    translated_text = resp.choices[0].message.content.strip()
+                except Exception as e:
+                    logger.error("Failed to translate part of %s: %s", src, e)
+                    translated_text = text
+
+                translated_entries.append(
+                    "\n".join([idx, timestamp, translated_text])
+                )
+                pbar.update(1)
+
+        dest.write_text("\n\n".join(translated_entries) + "\n", encoding="utf-8")
