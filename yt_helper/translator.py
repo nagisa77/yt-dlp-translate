@@ -35,6 +35,7 @@ class SubtitleTranslator:
             # Skip if any subtitle for the target language already exists
             existing = list(srt.parent.glob(f'{base_name}.{self.target_lang}*.srt'))
             if existing:
+                logger.info('Skipping %s because target subtitle already exists', srt)
                 processed.add(base_path)
                 continue
 
