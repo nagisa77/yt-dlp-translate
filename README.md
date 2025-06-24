@@ -1,4 +1,4 @@
-# YouTube Playlist Downloader
+# 🔥YouTube Playlist Downloader & Translator
 
 This project automates several tedious steps involved in archiving and watching
 YouTube content offline.  It can create or locate a playlist, download all
@@ -60,7 +60,7 @@ subtitles to the configured target language using your OpenAI API key.
 
 OAuth authentication is required on first run when using `playlist_name`. If `video_urls` are provided, the script skips Google login. Afterwards the script will print the playlist URL (if any), list the videos found and download each one with subtitles.
 
-## Obtaining `client_secrets.json`
+## Obtaining client_secrets.json file
 
 The following steps are only required when using `playlist_name` to access the YouTube Data API.
 
