@@ -1,1 +1,6 @@
 playlist_name: Example Playlist
+
+download:
+  output_path: downloads
+  format: bestvideo+bestaudio/best
+  subtitle_langs: ["en.*"]
