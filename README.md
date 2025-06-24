@@ -28,4 +28,5 @@ python main.py
 ```
 
 The script will open a browser for OAuth the first time it runs. After
-authentication, it will print the URL of the playlist.
+authentication, it will print the URL of the playlist and list the URL
+for each video currently in the playlist.

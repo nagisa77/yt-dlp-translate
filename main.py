@@ -76,3 +76,27 @@ else:
 
 playlist_url = f'https://www.youtube.com/playlist?list={playlist_id}'
 print('Playlist URL:', playlist_url)
+
+# List all video URLs in the playlist
+try:
+    playlist_items = []
+    page_token = None
+    while True:
+        request = youtube.playlistItems().list(
+            part='contentDetails',
+            playlistId=playlist_id,
+            maxResults=50,
+            pageToken=page_token,
+        )
+        response = request.execute()
+        playlist_items.extend(response.get('items', []))
+        page_token = response.get('nextPageToken')
+        if not page_token:
+            break
+except HttpError as e:
+    raise SystemExit(f'Error fetching playlist items: {e}')
+
+print('Video URLs:')
+for item in playlist_items:
+    video_id = item['contentDetails']['videoId']
+    print(f'https://www.youtube.com/watch?v={video_id}')
