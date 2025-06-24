@@ -25,16 +25,16 @@ class SubtitleTranslator:
     def translate_directory(self, base: Path):
         if not self.client:
             return
+
+        # Collect unique subtitle files that require translation
+        tasks = []
         processed: Set[Path] = set()
         for srt in base.rglob('*.en*.srt'):
-            # Remove the language suffix from the filename to determine the base
             base_name = re.sub(r'\.en[^.]*', '', srt.stem)
             base_path = srt.with_name(base_name)
-
             if base_path in processed:
                 continue
 
-            # Skip if any subtitle for the target language already exists
             existing = list(srt.parent.glob(f'{base_name}.{self.target_lang}*.srt'))
             if existing and not self.force:
                 logger.info('Skipping %s because target subtitle already exists', srt)
@@ -42,11 +42,15 @@ class SubtitleTranslator:
                 continue
 
             target = srt.with_name(f'{base_name}.{self.target_lang}-ai.srt')
-            self.translate_file(srt, target)
+            tasks.append((srt, target))
             processed.add(base_path)
 
+        total = len(tasks)
+        for idx, (srt, target) in enumerate(tasks, 1):
+            logger.info('Translating file %d/%d: %s -> %s', idx, total, srt, target)
+            self.translate_file(srt, target)
+
     def translate_file(self, src: Path, dest: Path):
-        logger.info('Translating %s -> %s', src, dest)
         content = src.read_text(encoding='utf-8')
         messages = [
             {
