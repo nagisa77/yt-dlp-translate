@@ -66,17 +66,8 @@ class SubtitleTranslator:
             with self._lock:
                 self._processed.add(base_path)
 
-        total = len(tasks)
-
-        with tqdm(total=total, desc='Translating', unit='file') as pbar:
-            futures = {
-                self.executor.submit(self.translate_file, srt, target):
-                (srt, target)
-                for srt, target in tasks
-            }
-            for _ in as_completed(futures):
-                pbar.update(1)
-
+        for srt, target in tasks:
+            self.executor.submit(self.translate_file, srt, target)
 
     def watch_directory(self, base: Path, stop_event: threading.Event, poll: float = 5.0) -> None:
         """Continuously translate subtitles in ``base`` until ``stop_event`` is set."""
