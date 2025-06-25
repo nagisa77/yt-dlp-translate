@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Iterable, Set
 import threading
 import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from tqdm import tqdm
 
@@ -23,7 +24,7 @@ class SubtitleTranslator:
         # Number of worker threads used for translating files
         self.threads = max(1, int(trans_conf.get('threads', 1)))
         # Track files currently being translated
-        self._in_progress: Set[Path] = set()
+        self._processed: Set[Path] = set()
         self._lock = threading.Lock()
         api_key = os.getenv('OPENAI_API_KEY')
         if not api_key:
@@ -38,47 +39,37 @@ class SubtitleTranslator:
 
         # Collect unique subtitle files that require translation
         tasks = []
-        processed: Set[Path] = set()
         for srt in base.rglob('*.en*.srt'):
             base_name = re.sub(r'\.en[^.]*', '', srt.stem)
             base_path = srt.with_name(base_name)
             with self._lock:
-                if base_path in processed or base_path in self._in_progress:
+                if base_path in self._processed:
                     continue
 
             existing = list(srt.parent.glob(f'{base_name}.{self.target_lang}*.srt'))
             if existing and not self.force:
                 logger.info('Skipping %s because target subtitle already exists', srt)
                 with self._lock:
-                    processed.add(base_path)
+                    self._processed.add(base_path)
                 continue
 
             target = srt.with_name(f'{base_name}.{self.target_lang}-ai.srt')
-            tasks.append((srt, target, base_path))
+            tasks.append((srt, target))
             with self._lock:
-                processed.add(base_path)
-                self._in_progress.add(base_path)
+                self._processed.add(base_path)
 
         total = len(tasks)
-        from concurrent.futures import ThreadPoolExecutor, as_completed
 
         with ThreadPoolExecutor(max_workers=self.threads) as ex, \
                 tqdm(total=total, desc='Translating', unit='file') as pbar:
             futures = {
-                ex.submit(self._translate_wrapper, srt, target, base_path):
+                ex.submit(self.translate_file, srt, target):
                 (srt, target)
-                for srt, target, base_path in tasks
+                for srt, target in tasks
             }
             for _ in as_completed(futures):
                 pbar.update(1)
 
-    def _translate_wrapper(self, src: Path, dest: Path, base_path: Path) -> None:
-        """Translate file and clear the in-progress marker when done."""
-        try:
-            self.translate_file(src, dest)
-        finally:
-            with self._lock:
-                self._in_progress.discard(base_path)
 
     def watch_directory(self, base: Path, stop_event: threading.Event, poll: float = 5.0) -> None:
         """Continuously translate subtitles in ``base`` until ``stop_event`` is set."""
@@ -92,7 +83,7 @@ class SubtitleTranslator:
     def translate_file(self, src: Path, dest: Path):
         """Translate a single SRT file with per-entry progress reporting."""
 
-        logger.info("!!!Begin Translating %s -> %s", src, dest)
+        logger.info("--- Begin Translating %s -> %s", src, dest)
         content = src.read_text(encoding="utf-8")
 
         # Split into subtitle blocks separated by blank lines
@@ -185,3 +176,4 @@ class SubtitleTranslator:
             process_batch()
 
         dest.write_text("\n\n".join(translated_entries) + "\n", encoding="utf-8")
+        logger.info("--- End Translating %s -> %s", src, dest)
