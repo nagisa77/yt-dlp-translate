@@ -41,3 +41,5 @@ downloader.download(urls)
 
 stop_event.set()
 watcher.join()
+
+translator.close()

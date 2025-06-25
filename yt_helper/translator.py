@@ -29,8 +29,17 @@ class SubtitleTranslator:
         if not api_key:
             logger.warning('OPENAI_API_KEY not set; translation disabled')
             self.client = None
+            self.executor = None
         else:
             self.client = openai.OpenAI(api_key=api_key)
+            self.executor = ThreadPoolExecutor(max_workers=self.threads)
+
+    def close(self) -> None:
+        if self.executor:
+            self.executor.shutdown(wait=True)
+
+    def __del__(self):
+        self.close()
 
     def translate_directory(self, base: Path):
         if not self.client:
@@ -59,10 +68,9 @@ class SubtitleTranslator:
 
         total = len(tasks)
 
-        with ThreadPoolExecutor(max_workers=self.threads) as ex, \
-                tqdm(total=total, desc='Translating', unit='file') as pbar:
+        with tqdm(total=total, desc='Translating', unit='file') as pbar:
             futures = {
-                ex.submit(self.translate_file, srt, target):
+                self.executor.submit(self.translate_file, srt, target):
                 (srt, target)
                 for srt, target in tasks
             }
