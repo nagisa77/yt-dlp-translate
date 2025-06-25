@@ -3,6 +3,8 @@ import os
 import re
 from pathlib import Path
 from typing import Iterable, Set
+import threading
+import time
 
 from tqdm import tqdm
 
@@ -61,6 +63,15 @@ class SubtitleTranslator:
             }
             for _ in as_completed(futures):
                 pbar.update(1)
+
+    def watch_directory(self, base: Path, stop_event: threading.Event, poll: float = 5.0) -> None:
+        """Continuously translate subtitles in ``base`` until ``stop_event`` is set."""
+        while not stop_event.is_set():
+            self.translate_directory(base)
+            # Wait for the next check or exit early if stopped
+            stop_event.wait(poll)
+        # Final pass after downloads finish
+        self.translate_directory(base)
 
     def translate_file(self, src: Path, dest: Path):
         """Translate a single SRT file with per-entry progress reporting."""
