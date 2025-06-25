@@ -1,27 +1,27 @@
 # 🔥YouTube Playlist Downloader & Translator
 
-This project automates several tedious steps involved in archiving and watching
-YouTube content offline.  It can create or locate a playlist, download all
-videos with subtitles and then translate the subtitles into your preferred
-language.  The downloaded files are stored locally so they can be played back on
+This project automates several tedious steps involved in archiving and
+watching YouTube content offline. It can create or locate a playlist, download
+every video with subtitles and then translate those subtitles into your
+preferred language. The files are stored locally so they can be played back on
 any device.
 
 ## Features
 
 * **Playlist management** – Create or locate a playlist on YouTube through the
-  Data API and retrieve every video URL.  Alternatively you can provide the list
+  Data API and retrieve every video URL. Alternatively, you can provide the list
   of video URLs directly in `config.yaml`.
 * **Video and subtitle downloader** – Grab each video with
   [yt-dlp](https://github.com/yt-dlp/yt-dlp), fetching subtitles in your target
   language when available or falling back to English.
-* **Automatic subtitle translation** – Any English subtitles are translated to
-  the configured language using OpenAI, so you always end up with subtitles you
-  can understand.
+* **Automatic subtitle translation** – English subtitles are translated to the
+  configured language using OpenAI, so you always end up with text you can
+  understand.
 * **Resume support** – Existing video files are detected and skipped, letting
-  you rerun the script to only download what is missing.
-* **Browser cookie authentication** – When YouTube requires a sign‑in you can
-  let yt-dlp reuse cookies from your browser so that even age-restricted videos
-  can be downloaded seamlessly.
+  you rerun the script to download only what is missing.
+* **Browser cookie authentication** – When YouTube requires a sign‑in, yt-dlp
+  can reuse cookies from your browser so even age‑restricted videos are
+  downloaded seamlessly.
 
 ## Setup
 
@@ -43,18 +43,22 @@ cp .env.example .env
 cp config.yaml.example config.yaml
 ```
 
-4. Adjust `config.yaml` to define either a `playlist_name` or a list of `video_urls`, along with the output directory and download options. If
-   YouTube requests a sign-in to confirm you're not a bot, set `cookies_from_browser` under the
-   `download` section to let yt-dlp authenticate using your browser cookies. The extracted
-   cookies will be saved to `youtube_cookies.txt` in the project directory for reuse.
-   Set `download.concurrent_fragment_downloads` to the desired thread count to
-   enable multi-threaded fragment downloads. Leave it unset to disable.
-   Set `translate.force` to `true` if you want subtitles translated even when files in the target language already exist.
-    Use `translate.entries_per_request` to batch multiple subtitle entries into a single OpenAI request.
-    When a batch produces fewer translated lines than expected, the translator
-    automatically halves the batch and retries until every line is translated or
-    only single-line requests remain.
-   Set `translate.threads` to the number of subtitle files to translate in parallel.
+4. Adjust `config.yaml` to specify either `playlist_name` or a list of
+   `video_urls` along with the output directory and download options.
+   Useful settings include:
+   - `cookies_from_browser` under `download` lets yt-dlp authenticate using your
+     browser cookies when YouTube asks for a sign‑in. Extracted cookies are saved
+     to `youtube_cookies.txt` for reuse.
+   - `download.concurrent_fragment_downloads` sets the thread count for
+     multi-threaded fragment downloads. Leave it unset to disable.
+   - `translate.force` forces subtitle translation even if files already exist in
+     the target language.
+   - `translate.entries_per_request` batches multiple subtitle entries into one
+     OpenAI request. When a batch yields fewer lines than expected, the
+     translator halves the batch and retries until every line is translated or
+     only single-line requests remain.
+   - `translate.threads` defines how many subtitle files are translated in
+     parallel.
 
 5. Run the helper to download videos and subtitles:
 
@@ -62,14 +66,17 @@ cp config.yaml.example config.yaml
 python main.py
 ```
 
-After the download finishes, the script will automatically translate any English
+After the download finishes, the script automatically translates any English
 subtitles to the configured target language using your OpenAI API key. The
 translator runs in parallel with the downloader, so translation begins as soon
 as matching ``*.en*.srt`` files appear in the output directory. It keeps
-checking for new files until all downloads are complete. The ``translate.force``
-option still applies when deciding whether to translate existing subtitles.
+checking for new files until all downloads finish. The ``translate.force``
+option still decides whether to retranslate existing subtitles.
 
-OAuth authentication is required on first run when using `playlist_name`. If `video_urls` are provided, the script skips Google login. Afterwards the script will print the playlist URL (if any), list the videos found and download each one with subtitles.
+OAuth authentication is required on first run when using `playlist_name`. If
+`video_urls` are provided, the script skips Google login. After authentication
+the script prints the playlist URL (if any), lists the videos found and
+downloads each one with subtitles.
 
 ## Obtaining client_secrets.json file
 
