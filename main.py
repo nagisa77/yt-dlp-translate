@@ -3,6 +3,7 @@ import pathlib
 import yaml
 
 from yt_helper import YouTubePlaylist, Downloader, SubtitleTranslator
+import threading
 
 logging.basicConfig(
     level=logging.INFO,
@@ -26,7 +27,17 @@ if not urls:
     logger.info('Found %d videos in playlist', len(urls))
 
 downloader = Downloader(config)
+translator = SubtitleTranslator(config)
+
+stop_event = threading.Event()
+watcher = threading.Thread(
+    target=translator.watch_directory,
+    args=(downloader.output_path, stop_event),
+    daemon=True,
+)
+watcher.start()
+
 downloader.download(urls)
 
-translator = SubtitleTranslator(config)
-translator.translate_directory(downloader.output_path)
+stop_event.set()
+watcher.join()

@@ -54,6 +54,7 @@ cp config.yaml.example config.yaml
     When a batch produces fewer translated lines than expected, the translator
     automatically halves the batch and retries until every line is translated or
     only single-line requests remain.
+   Set `translate.threads` to the number of subtitle files to translate in parallel.
 
 5. Run the helper to download videos and subtitles:
 
@@ -62,7 +63,11 @@ python main.py
 ```
 
 After the download finishes, the script will automatically translate any English
-subtitles to the configured target language using your OpenAI API key.
+subtitles to the configured target language using your OpenAI API key. The
+translator runs in parallel with the downloader, so translation begins as soon
+as matching ``*.en*.srt`` files appear in the output directory. It keeps
+checking for new files until all downloads are complete. The ``translate.force``
+option still applies when deciding whether to translate existing subtitles.
 
 OAuth authentication is required on first run when using `playlist_name`. If `video_urls` are provided, the script skips Google login. Afterwards the script will print the playlist URL (if any), list the videos found and download each one with subtitles.
 
