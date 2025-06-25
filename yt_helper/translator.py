@@ -114,8 +114,6 @@ class SubtitleTranslator:
                     {"role": "user", "content": "\n".join(numbered)},
                 ]
 
-                logger.info("Translating batch \n %s", "\n".join(numbered))
-
                 translations_map: dict[int, str] = {}
                 try:
                     resp = self.client.chat.completions.create(
@@ -132,10 +130,10 @@ class SubtitleTranslator:
                     logger.error("Failed to translate part of %s: %s", src, e)
 
                 if len(translations_map) != len(segment) and len(segment) > 1:
-                    logger.warning(
-                        "Mismatched line count; retrying with smaller batches: %d -> %d",
-                        len(segment), len(segment) // 2 or 1,
-                    )
+                    # logger.warning(
+                    #     "Mismatched line count; retrying with smaller batches: %d -> %d",
+                    #     len(segment), len(segment) // 2 or 1,
+                    # )
                     mid = len(segment) // 2
                     return translate_segment(segment[:mid]) + translate_segment(segment[mid:])
 
