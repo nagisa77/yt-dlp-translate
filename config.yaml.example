@@ -22,6 +22,8 @@ download:
   # cookies_from_browser: chrome
   # cookies_from_browser: edge
   # cookies_from_browser: "chrome --profile MyProfile"
+  # Parallel fragment downloads per video
+  # concurrent_fragment_downloads: 4
 
 translate:
   # Target language code, e.g. zh or ja
