@@ -6,7 +6,6 @@ from typing import Iterable, Set
 import threading
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
-
 from tqdm import tqdm
 
 import openai
