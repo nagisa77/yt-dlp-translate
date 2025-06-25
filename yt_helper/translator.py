@@ -22,6 +22,9 @@ class SubtitleTranslator:
         self.entries_per_request = max(1, trans_conf.get('entries_per_request', 1))
         # Number of worker threads used for translating files
         self.threads = max(1, int(trans_conf.get('threads', 1)))
+        # Track files currently being translated
+        self._in_progress: Set[Path] = set()
+        self._lock = threading.Lock()
         api_key = os.getenv('OPENAI_API_KEY')
         if not api_key:
             logger.warning('OPENAI_API_KEY not set; translation disabled')
@@ -39,18 +42,22 @@ class SubtitleTranslator:
         for srt in base.rglob('*.en*.srt'):
             base_name = re.sub(r'\.en[^.]*', '', srt.stem)
             base_path = srt.with_name(base_name)
-            if base_path in processed:
-                continue
+            with self._lock:
+                if base_path in processed or base_path in self._in_progress:
+                    continue
 
             existing = list(srt.parent.glob(f'{base_name}.{self.target_lang}*.srt'))
             if existing and not self.force:
                 logger.info('Skipping %s because target subtitle already exists', srt)
-                processed.add(base_path)
+                with self._lock:
+                    processed.add(base_path)
                 continue
 
             target = srt.with_name(f'{base_name}.{self.target_lang}-ai.srt')
-            tasks.append((srt, target))
-            processed.add(base_path)
+            tasks.append((srt, target, base_path))
+            with self._lock:
+                processed.add(base_path)
+                self._in_progress.add(base_path)
 
         total = len(tasks)
         from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -58,11 +65,20 @@ class SubtitleTranslator:
         with ThreadPoolExecutor(max_workers=self.threads) as ex, \
                 tqdm(total=total, desc='Translating', unit='file') as pbar:
             futures = {
-                ex.submit(self.translate_file, srt, target): (srt, target)
-                for srt, target in tasks
+                ex.submit(self._translate_wrapper, srt, target, base_path):
+                (srt, target)
+                for srt, target, base_path in tasks
             }
             for _ in as_completed(futures):
                 pbar.update(1)
+
+    def _translate_wrapper(self, src: Path, dest: Path, base_path: Path) -> None:
+        """Translate file and clear the in-progress marker when done."""
+        try:
+            self.translate_file(src, dest)
+        finally:
+            with self._lock:
+                self._in_progress.discard(base_path)
 
     def watch_directory(self, base: Path, stop_event: threading.Event, poll: float = 5.0) -> None:
         """Continuously translate subtitles in ``base`` until ``stop_event`` is set."""
