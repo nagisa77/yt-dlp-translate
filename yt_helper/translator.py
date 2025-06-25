@@ -18,6 +18,8 @@ class SubtitleTranslator:
         # When True, translate even if subtitles in the target language already exist
         self.force = trans_conf.get('force', False)
         self.entries_per_request = max(1, trans_conf.get('entries_per_request', 1))
+        # Number of worker threads used for translating files
+        self.threads = max(1, int(trans_conf.get('threads', 1)))
         api_key = os.getenv('OPENAI_API_KEY')
         if not api_key:
             logger.warning('OPENAI_API_KEY not set; translation disabled')
@@ -49,9 +51,15 @@ class SubtitleTranslator:
             processed.add(base_path)
 
         total = len(tasks)
-        with tqdm(total=total, desc='Translating', unit='file') as pbar:
-            for idx, (srt, target) in enumerate(tasks, 1):
-                self.translate_file(srt, target)
+        from concurrent.futures import ThreadPoolExecutor, as_completed
+
+        with ThreadPoolExecutor(max_workers=self.threads) as ex, \
+                tqdm(total=total, desc='Translating', unit='file') as pbar:
+            futures = {
+                ex.submit(self.translate_file, srt, target): (srt, target)
+                for srt, target in tasks
+            }
+            for _ in as_completed(futures):
                 pbar.update(1)
 
     def translate_file(self, src: Path, dest: Path):

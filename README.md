@@ -54,6 +54,7 @@ cp config.yaml.example config.yaml
     When a batch produces fewer translated lines than expected, the translator
     automatically halves the batch and retries until every line is translated or
     only single-line requests remain.
+   Set `translate.threads` to the number of subtitle files to translate in parallel.
 
 5. Run the helper to download videos and subtitles:
 
