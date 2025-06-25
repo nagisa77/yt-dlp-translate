@@ -39,6 +39,13 @@ class Downloader:
             else:
                 # Allow passing tuples directly for advanced usage
                 self.opts['cookiesfrombrowser'] = tuple(browser)
+
+        threads = dl_config.get('concurrent_fragment_downloads')
+        if threads:
+            try:
+                self.opts['concurrent_fragment_downloads'] = int(threads)
+            except Exception:
+                logger.warning('Invalid concurrent_fragment_downloads: %s', threads)
         self.output_path.mkdir(parents=True, exist_ok=True)
 
     def download(self, urls: Iterable[str]):

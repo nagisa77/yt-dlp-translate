@@ -47,6 +47,8 @@ cp config.yaml.example config.yaml
    YouTube requests a sign-in to confirm you're not a bot, set `cookies_from_browser` under the
    `download` section to let yt-dlp authenticate using your browser cookies. The extracted
    cookies will be saved to `youtube_cookies.txt` in the project directory for reuse.
+   Set `download.concurrent_fragment_downloads` to the desired thread count to
+   enable multi-threaded fragment downloads. Leave it unset to disable.
    Set `translate.force` to `true` if you want subtitles translated even when files in the target language already exist.
     Use `translate.entries_per_request` to batch multiple subtitle entries into a single OpenAI request.
     When a batch produces fewer translated lines than expected, the translator
