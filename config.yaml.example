@@ -36,4 +36,4 @@ translate:
   force: false
   # force: true
   # Number of subtitle entries to send in each OpenAI request
-  entries_per_request: 1
+  entries_per_request: 10
