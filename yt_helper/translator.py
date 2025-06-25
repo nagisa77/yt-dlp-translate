@@ -110,7 +110,7 @@ class SubtitleTranslator:
         translated_entries: list[str] = []
         total = len(entries)
 
-        with tqdm(total=total, desc=["[translate]", src.name[:10] + "..." if len(src.name) > 10 else src.name], unit="entry") as pbar:
+        with tqdm(total=total, desc=("[translate] " + src.name[:20] + "..." if len(src.name) > 10 else src.name), unit="entry") as pbar:
             batch: list[tuple[str, str, str]] = []
 
             def translate_segment(segment: list[tuple[str, str, str]]) -> list[str]:
