@@ -76,6 +76,7 @@ class SubtitleTranslator:
     def translate_file(self, src: Path, dest: Path):
         """Translate a single SRT file with per-entry progress reporting."""
 
+        logger.info("!!!Begin Translating %s -> %s", src, dest)
         content = src.read_text(encoding="utf-8")
 
         # Split into subtitle blocks separated by blank lines
@@ -113,7 +114,7 @@ class SubtitleTranslator:
                     {"role": "user", "content": "\n".join(numbered)},
                 ]
 
-                logger.info("Translating batch %s", "\n".join(numbered))
+                logger.info("Translating batch \n %s", "\n".join(numbered))
 
                 translations_map: dict[int, str] = {}
                 try:
