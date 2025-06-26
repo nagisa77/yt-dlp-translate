@@ -29,7 +29,7 @@ class Downloader:
         self.opts['outtmpl'] = str(self.output_path / '%(playlist)s/%(title)s.%(ext)s')
         browser = dl_config.get('cookies_from_browser')
         if browser:
-            logger.info('Using cookies from browser %s', browser)
+            logger.debug('Using cookies from browser %s', browser)
             self.opts['cookiefile'] = 'youtube_cookies.txt'
             if isinstance(browser, str):
                 # Reuse yt-dlp's parser to handle KEYRING/PROFILE/CONTAINER syntax
@@ -49,7 +49,7 @@ class Downloader:
         self.output_path.mkdir(parents=True, exist_ok=True)
 
     def download(self, urls: Iterable[str]):
-        logger.info('Starting download of %d videos', len(list(urls)))
+        logger.debug('Starting download of %d videos', len(list(urls)))
         # Re-generate iterable because we consumed it to count; easiest approach
         urls = list(urls)
         with YoutubeDL(self.opts) as ydl:
@@ -58,9 +58,9 @@ class Downloader:
                     info = ydl.extract_info(url, download=False)
                     filepath = Path(ydl.prepare_filename(info))
                     if filepath.exists():
-                        logger.info('Skipping %s; %s already exists', url, filepath)
+                        logger.debug('Skipping %s; %s already exists', url, filepath)
                         continue
-                    logger.info('Downloading %s', url)
+                    logger.debug('Downloading %s', url)
                     ydl.download([url])
                 except Exception as e:
                     logger.error('Failed to download %s: %s', url, e)

@@ -9,7 +9,15 @@ logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s',
 )
+# Silence noisy libraries and keep only our own output at INFO level
+logging.getLogger().setLevel(logging.WARNING)
+logging.getLogger('httpx').setLevel(logging.WARNING)
+logging.getLogger('openai').setLevel(logging.WARNING)
+logging.getLogger('yt_dlp').setLevel(logging.WARNING)
+logging.getLogger('yt_helper').setLevel(logging.INFO)
+
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 CONFIG_FILE = pathlib.Path('config.yaml')
 assert CONFIG_FILE.exists(), 'config.yaml not found'
